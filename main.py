@@ -1,16 +1,20 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+import mujoco_py as mjp
+import numpy as np
+import matplotlib.pyplot as plt
+from utils.deformation import Deformation
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    xml_path = "assets/sim.xml"
+    model = mjp.load_model_from_path(xml_path)
+    sim = mjp.MjSim(model)
+    #viewer = mjp.MjViewer(sim)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    gel_def = Deformation("assets/tensor.mat")
+
+    a = sim.render(width=1640, height=1232, camera_name='tactile_cam', depth=True)
+    rgb_img = a[0][616-360:616+360, 820-640:820+640, :]
+    depth_img = a[1][616-360:616+360, 820-640:820+640]
+    plt.imshow(depth_img)
+    plt.show()
+    print(np.max(depth_img))
