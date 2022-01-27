@@ -1,0 +1,28 @@
+<mujoco model="tactile_sim">
+    <compiler angle="radian" />
+    <size njmax="500" nconmax="100" />
+    <visual>
+        <headlight active="0" />
+    </visual>
+
+    <asset>
+        <!--<texture type="skybox" builtin="gradient" rgb1="1 1 1" rgb2="0 0 0" height="100" width="100"/>-->
+        <texture name="texplane" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" type="2d" height="100" width="100"/>
+        <material name="matplane" reflectance="0" shininess="0.8" specular="0.8" texrepeat="1 1" texture="texplane" texuniform="true"/>
+    </asset>
+
+    <worldbody>
+        <geom name="floor" type="plane" size="10 10 10" material="matplane"/>
+        <body name="tactile_sensor_body" pos="0 0 1">
+            <camera />
+            <camera name="tactile_cam" mode="fixed" quat="0 0.707107 -0.707107 0" fovy="110" />
+            <geom name="acryl" type="box" size="0.013 0.021 0.0015" pos="0 0 0.0165" rgba="0 1 1 0" />
+            <geom name="gel" type="box" size="0.0125 0.02 0.0025" pos="0 0 0.0205" rgba="0 0.5 0.5 1" />
+        </body>
+
+        <!--<body name="obj0" pos="0 0 0.05" >
+            <geom type="sphere" size="0.01" rgba="0 0 1 1" />
+            <freejoint />
+        </body>-->
+    </worldbody>
+</mujoco>
