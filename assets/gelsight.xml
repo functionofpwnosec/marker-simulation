@@ -1,0 +1,26 @@
+<mujoco model="Gelsight">
+    <compiler angle="radian"/>
+    <size njmax="500" nconmax="100"/>
+    <asset>
+	<mesh name="obj" file="meshes/objects/airpods.stl" scale = "0.001 0.001 0.001" />
+    </asset>
+
+    <worldbody>
+	    <light pos="0.6 0.6 3" />
+        <light pos="0.6 -0.6 3" />
+        <light pos="-0.6 0.6 3" />
+        <light pos="-0.6 -0.6 3" />
+        <body name = "gelsight">
+		<geom type="box" pos = "0 -0.015 0.01" size="0.0175 0.0025 0.01" rgba = "0.5 1 1 1"/>
+		<geom type="box" pos = "0 0.015 0.01" size="0.0175 0.0025 0.01" rgba = "0.5 1 1 1"/>
+		<geom type="box" pos = "0.015 0 0.01" size="0.0025 0.0125 0.01" rgba = "0.5 1 1 1"/>
+		<geom type="box" pos = "-0.015 0 0.01" size="0.0025 0.0125 0.01" rgba = "0.5 1 1 1"/>
+	</body> 
+	<body>  
+		<camera name="depth_camera" fovy="40" pos = "0 0 0" zaxis = "0 0 -1"/>
+	</body>
+	<body>
+		<geom type="mesh" mesh = "obj" pos = "0 0 0.055"/>
+	</body>
+    </worldbody>
+</mujoco>
