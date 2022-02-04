@@ -28,5 +28,3 @@ if __name__ == '__main__':
 
     gel_deformation = Deformation("assets/membrane_nodes.txt", "assets/tensor.mat", test_depth_maps[0])
 
-    for i in range(len(test_depth_maps)):
-
