@@ -1,15 +1,17 @@
 import numpy as np
 import cv2
+import copy
 from scipy.io import loadmat
 
 class Deformation:
     def __init__(self, nodes_path, tensor_path, init_depth_map):
         nodes = np.loadtxt(nodes_path)
         self.nodes = nodes[:, [0, 2, 1, 3]]
+        self.marker_nodes = self.set_marker_nodes()
         self.active_nodes = []
         self.tensor = self.extract_tensor(tensor_path)
         self.pxpermm = 20
-        self.depthpermm = 10
+        self.depthpermm = -200
         self.nodes_px = np.rint(self.nodes[:, 1:3] * self.pxpermm).astype(int)
         self.depth_map = init_depth_map
         self.depth_binary = np.zeros_like(init_depth_map)
@@ -23,7 +25,18 @@ class Deformation:
                 self.set_M()
             modified_constraint = self.modify_constraint(init_constraint)
             final_node_pos = self.calculate_passive_nodes(modified_constraint)
+        else:
+            final_node_pos = self.nodes[:, 1:]
 
+        return final_node_pos
+
+    def set_marker_nodes(self):
+        marker_nodes = []
+        for i in range(self.nodes.shape[0]):
+            if self.nodes[i, 1] > 0 and self.nodes[i, 2] > 0 and self.nodes[i, 1] < 25 and self.nodes[i, 2] < 40 and self.nodes[i, 1] % 2 == 0 and self.nodes[i, 2] % 2 == 0:
+                marker_nodes.append(i)
+
+        return marker_nodes
 
     def extract_tensor(self, tensor_path):
         tensor_struct = loadmat(tensor_path)
@@ -60,9 +73,9 @@ class Deformation:
         for node_num in self.active_nodes:
             constraint = self.depth_map[self.nodes_px[node_num, 0], self.nodes_px[node_num, 1]]/self.depthpermm
             constraints.append(constraint)
-        init_constraint_z = np.array(constraints)
+        init_constraint_z = np.array(constraints).reshape(len(constraints), 1)
         init_constraint_xy = np.zeros((len(self.active_nodes), 2))
-        init_constraint = np.hstack(init_constraint_xy, init_constraint_z)
+        init_constraint = np.hstack((init_constraint_xy, init_constraint_z))
         init_constraint = init_constraint.flatten()
 
         return init_constraint
@@ -84,9 +97,9 @@ class Deformation:
         return modified_constraint
 
     def calculate_passive_nodes(self, modified_constraint):
-        final_node_pos = self.nodes[:, 1:]
+        final_node_pos = copy.copy(self.nodes[:, 1:])
         for i in range(final_node_pos.shape[0]):
             for j in range(len(self.active_nodes)):
-                final_node_pos[i, :] += self.tensor[self.active_nodes[j], i, :, :]*modified_constraint[j*3:(j+1)*3]
+                final_node_pos[i, :] += np.matmul(self.tensor[self.active_nodes[j], i, :, :], modified_constraint[j*3:(j+1)*3])
 
         return final_node_pos
