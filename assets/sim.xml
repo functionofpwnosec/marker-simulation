@@ -1,28 +1,119 @@
-<mujoco model="tactile_sim">
+<mujoco model="env">
     <compiler angle="radian" />
+
+    <option timestep="0.0333333" />
+
     <size njmax="500" nconmax="100" />
+
     <visual>
-        <headlight active="0" />
+        <headlight active="1" />
     </visual>
 
+    <default>
+        <light directional="false" castshadow="false" cutoff="90" />
+    </default>
+
     <asset>
-        <!--<texture type="skybox" builtin="gradient" rgb1="1 1 1" rgb2="0 0 0" height="100" width="100"/>-->
+        <texture type="skybox" builtin="gradient" rgb1="1 1 1" rgb2="0 0 0" height="100" width="100"/>
         <texture name="texplane" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" type="2d" height="100" width="100"/>
         <material name="matplane" reflectance="0" shininess="0.8" specular="0.8" texrepeat="1 1" texture="texplane" texuniform="true"/>
+        <material name="mattable" reflectance="0" shininess="0.5" specular="0.5" rgba="0.4 0.4 0.4 1" />
+        <mesh name="tact_sensor_case" file="meshes/case.STL" scale="0.001 0.001 0.001" />
+        <mesh name="circleshell" file="meshes/objects/circleshell.STL" scale="0.001 0.001 0.001" />
+        <mesh name="cone" file="meshes/objects/cone.STL" scale="0.001 0.001 0.001" />
+        <mesh name="cross" file="meshes/objects/cross.STL" scale="0.001 0.001 0.001" />
+        <mesh name="cubehole" file="meshes/objects/cubehole.STL" scale="0.001 0.001 0.001" />
+        <mesh name="cuboid" file="meshes/objects/cuboid.STL" scale="0.001 0.001 0.001" />
+        <mesh name="cylinder" file="meshes/objects/cylinder.STL" scale="0.001 0.001 0.001" />
+        <mesh name="doubleslope" file="meshes/objects/doubleslope.STL" scale="0.001 0.001 0.001" />
+        <mesh name="hemisphere" file="meshes/objects/hemisphere.STL" scale="0.001 0.001 0.001" />
+        <mesh name="line" file="meshes/objects/line.STL" scale="0.001 0.001 0.001" />
+        <mesh name="pacman" file="meshes/objects/pacman.STL" scale="0.001 0.001 0.001" />
+        <mesh name="S" file="meshes/objects/S.STL" scale="0.001 0.001 0.001" />
+        <mesh name="sphere" file="meshes/objects/sphere.STL" scale="0.001 0.001 0.001" />
+        <mesh name="squareshell" file="meshes/objects/squareshell.STL" scale="0.001 0.001 0.001" />
+        <mesh name="star" file="meshes/objects/star.STL" scale="0.001 0.001 0.001" />
+        <mesh name="tetrahedron" file="meshes/objects/tetrahedron.STL" scale="0.001 0.001 0.001" />
+        <mesh name="torus" file="meshes/objects/torus.STL" scale="0.001 0.001 0.001" />
     </asset>
 
     <worldbody>
         <geom name="floor" type="plane" size="10 10 10" material="matplane"/>
-        <body name="tactile_sensor_body" pos="0 0 1">
-            <camera />
-            <camera name="tactile_cam" mode="fixed" quat="0 0.707107 -0.707107 0" fovy="110" />
-            <geom name="acryl" type="box" size="0.013 0.021 0.0015" pos="0 0 0.0165" rgba="0 1 1 0" />
-            <geom name="gel" type="box" size="0.0125 0.02 0.0025" pos="0 0 0.0205" rgba="0 0.5 0.5 1" />
+        <geom name="table" type="box" size="0.6 0.6 0.05" pos="0 0 0.75" material="mattable" />
+        <geom type="box" size="0.05 0.05 0.35" pos="0.45 0.45 0.35" rgba="1 1 1 1" />
+        <geom type="box" size="0.05 0.05 0.35" pos="0.45 -0.45 0.35" rgba="1 1 1 1" />
+        <geom type="box" size="0.05 0.05 0.35" pos="-0.45 0.45 0.35" rgba="1 1 1 1" />
+        <geom type="box" size="0.05 0.05 0.35" pos="-0.45 -0.45 0.35" rgba="1 1 1 1" />
+        <light pos="0.6 0.6 3" />
+        <light pos="0.6 -0.6 3" />
+        <light pos="-0.6 0.6 3" />
+        <light pos="-0.6 -0.6 3" />
+
+        <camera name="cam" pos="0 -0.26 0.95" quat="0.866025 0.5 0 0" />
+
+        <body name="tact_sensor" pos="0 0 0.845" quat="0 1 0 0">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="tact_sensor_case" />
+            <camera name="tact_cam" fovy="34.87" pos="0 0 0" quat="0 1 0 0" /> <!--fovy="37"--> <!--fovy="46.73" pos="0 0 0.006"-->
+            <joint name="tact_x" type="slide" axis="1 0 0" limited="true" range="-0.6 0.6" />
+            <joint name="tact_y" type="slide" axis="0 -1 0" limited="true" range="-0.6 0.6" />
+            <joint name="tact_z" type="slide" />
+            <joint name="tact_r" limited="true" range="0 6.28319" />
+            <body name="gel" pos="0 0 0.0335">
+                <geom type="cylinder" contype="0" conaffinity="0" size="0.02 0.0015" rgba="0 0 0 0" />
+            </body>
         </body>
 
-        <!--<body name="obj0" pos="0 0 0.05" >
-            <geom type="sphere" size="0.01" rgba="0 0 1 1" />
-            <freejoint />
-        </body>-->
+        <body name="obj0" pos="-0.09 0.09 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="circleshell" />
+        </body>
+        <body name="obj1" pos="-0.03 0.09 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="cone" />
+        </body>
+        <body name="obj2" pos="0.03 0.09 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="cross" />
+        </body>
+        <body name="obj3" pos="0.09 0.09 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="cubehole" />
+        </body>
+        <body name="obj4" pos="-0.09 0.03 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="cuboid" />
+        </body>
+        <body name="obj5" pos="-0.03 0.03 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="cylinder" />
+        </body>
+        <body name="obj6" pos="0.03 0.03 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="doubleslope" />
+        </body>
+        <body name="obj7" pos="0.09 0.03 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="hemisphere" />
+        </body>
+        <body name="obj8" pos="-0.09 -0.03 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="line" />
+        </body>
+        <body name="obj9" pos="-0.03 -0.03 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="pacman" />
+        </body>
+        <body name="obj10" pos="0.03 -0.03 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="S" />
+        </body>
+        <body name="obj11" pos="0.09 -0.03 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="sphere" />
+        </body>
+        <body name="obj12" pos="-0.09 -0.09 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="squareshell" />
+        </body>
+        <body name="obj13" pos="-0.03 -0.09 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="star" />
+        </body>
+        <body name="obj14" pos="0.03 -0.09 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="tetrahedron" />
+        </body>
+        <body name="obj15" pos="0.09 -0.09 0.8">
+            <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="torus" />
+        </body>
     </worldbody>
+
+    <actuator>
+    </actuator>
+
 </mujoco>
