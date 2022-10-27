@@ -5,4 +5,4 @@ We present a generative adversarial network(GAN)-based method for generating rea
 All images collected in our work can be found under `data` folder.
 The `data/raw` folder contains the raw tactile and simulated depth images and the `data/dataset` folder contains the cropped & resized tactile and depth images.
 
-## Image generation
+## Generating images with trained generator
