@@ -6,3 +6,7 @@ All images collected in our work can be found under `data` folder.
 The `data/raw` folder contains the raw tactile and simulated depth images and the `data/dataset` folder contains the cropped & resized tactile and depth images.
 
 ## Generating images with trained generator
+
+
+## Evaluation
+We have evaluated the quality of 
