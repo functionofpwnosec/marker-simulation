@@ -1,3 +1,3 @@
-# marker_simulation
+# Marker-Embedded Tactile Image Generation via Generative Adversarial Networks
 
-"assets/tensor.mat" file was not uploaded due to size issues.
+We present a generative adversarial network(GAN)-based method for generating realistic marker-embedded tactile images in Gelsight-like vision-based tactile sensors.
