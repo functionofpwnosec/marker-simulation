@@ -1,133 +1,67 @@
-import numpy as np
+import sys
 import os
-import cv2
-import random
+import argparse
+import numpy as np
+#import cv2
+import torch
+import mujoco_py as mjp
 
+obj_list = ['circleshell', 'cone', 'cross', 'cubehole', 'cuboid', 'cylinder', 'doubleslope', 'hemisphere', 'line',
+            'pacman', 'S', 'sphere', 'squareshell', 'star', 'tetrahedron', 'torus']
 
-def undistort_img(img):
-    mtx = np.array([[4339.16818, 0., 802.366038], [0., 4349.33265, 647.352978], [0., 0., 1.]])
-    dist = np.array([[3.24183243, -73.5637684, -8.85091754e-03, -2.37823943e-04, 398.493127]])
+parser = argparse.ArgumentParser()
+parser.add_argument('--obj', type=str, default='circleshell', choices=obj_list)
+parser.add_argument('--x', type=float, default=0.0)
+parser.add_argument('--y', type=float, default=0.0)
+parser.add_argument('--r', type=float, default=0.0)
+parser.add_argument('--dx', type=float, default=0.0)
+parser.add_argument('--dy', type=float, default=0.0)
+parser.add_argument('--dz', type=float, default=0.0)
+parser.add_argument('--visualize_sim', type=bool, default=False)
 
-    undistorted_img = cv2.undistort(img, mtx, dist, None, mtx)
+args = parser.parse_args()
 
-    return undistorted_img
+def depth2img(depth):
+    extent = sim.model.stat.extent
+    znear = sim.model.vis.map.znear * extent
+    zfar = sim.model.vis.map.zfar * extent
+    depth = 2. * depth - 1.00
+    depth = 2. * znear * zfar / (zfar + znear - depth * (zfar - znear))
 
+    depth[depth > 0.035] = 0.035
+    depth[depth > 0.032] = 0.032
+    image = 255 * (depth - 0.032) / 0.003
 
-def resize_img(img):
-    resized_img = cv2.resize(img, (256, 256), interpolation=cv2.INTER_AREA)
+    return image.astype(np.uint8)
 
-    return resized_img
+def get_depth_img(sim):
+    _, depth_frame = sim.render(width=1640, height=1232, camera_name='tact_cam', depth=True)
 
-
-def crop_img(img, dim, offset=[0, 0]):
-    img_center = [img.shape[0]/2 + offset[0], img.shape[1]/2 + offset[1]]
-    cropped_img = img[int(img_center[0] - dim[0]/2):int(img_center[0] + dim[0]/2), int(img_center[1] - dim[1]/2):int(img_center[1] + dim[1]/2)]
-
-    resized_img = resize_img(cropped_img)
-
-    return resized_img
+    return depth2img(depth_frame)
 
 
 if __name__ == '__main__':
-    obj_list = ["S", "pacman", "star", "cone", "circleshell", "hemisphere", "doubleslope", "cubehole"]
-    test_list = ["S", "pacman", "star", "cone", "circleshell", "hemisphere", "doubleslope", "cubehole"]
-    stop = False
-    find_center = False
-    init = True
+    if args.dz < 0 or args.dz > 1.5:
+        raise ValueError('dz should be in range [0, 1.5]')
+    if args.dx < -1 or args.dx > 1:
+        raise ValueError('dx should be in range [-1, 1]')
+    if args.dy < -1 or args.dy > 1:
+        raise ValueError('dy should be in range [-1, 1]')
 
-    if find_center:
-        ### find center
-        a = 16
-        b = 16
-        while True:
-            img = cv2.imread('/home/won/Dropbox/marker_sim_real_images/raw/real/cuboid/34_15_dx_0_dy_0.jpg')
-            #img = undistort_img(img)
-            img = crop_img(img, [896, 896], [a, b])
-            img = cv2.line(img, (0, 127), (255, 127), (0, 0, 0), 1)
-            img = cv2.line(img, (127, 0), (127, 255), (0, 0, 0), 1)
-            cv2.imshow("Real", img)
-            key = cv2.waitKey(0)
-            if key == 119:  # w
-                a -= 1
-            elif key == 115:  # s
-                a += 1
-            elif key == 97:  # a
-                b -= 1
-            elif key == 100:  # d
-                b += 1
-            elif key == 27:  # esc
-                break
+    xml_path = os.path.join('assets', 'sim.xml')
+    model = mjp.load_model_from_path(xml_path)
+    sim = mjp.MjSim(model)
+    sim.forward()
 
-        print(a, ',', b)
+    obj_name = 'obj' + str(obj_list.index(args.obj))
+    obj_pos = sim.data.get_body_xpos(obj_name)
 
-    else:
-        for obj_name in obj_list:
-            raw_real_dir = "/home/won/Dropbox/marker_sim_real_images/raw/real/" + obj_name
-            raw_sim_dir = "/home/won/Dropbox/marker_sim_real_images/raw/sim/" + obj_name
+    # set to initial position
+    qpos = [obj_pos[0] + args.x, obj_pos[1] + args.y, 0, args.r * np.pi / 180]
+    sim.data.qpos[:] = qpos
+    sim.forward()
 
-            train_real_dir = "/home/won/Dropbox/marker_sim_real_images/dataset/train/real/"
-            train_sim_dir = "/home/won/Dropbox/marker_sim_real_images/dataset/train/sim/"
-            test_real_dir = "/home/won/Dropbox/marker_sim_real_images/dataset/test_v2/real/"
-            test_sim_dir = "/home/won/Dropbox/marker_sim_real_images/dataset/test_v2/sim/"
+    frame = get_depth_img(sim)
 
-            real_dir_list = os.listdir(raw_real_dir)
-
-            test_cnt_list = list(range(63))
-            random.shuffle(test_cnt_list)
-            test_cnt_list = test_cnt_list[:15]
-
-            for img_file in real_dir_list:
-                real_img_dir = os.path.join(raw_real_dir, img_file)
-                real_img = cv2.imread(real_img_dir)
-                real_img = undistort_img(real_img)
-                real_img = crop_img(real_img, [896, 896])
-
-                sim_img_dir = os.path.join(raw_sim_dir, img_file)
-                sim_img = cv2.imread(sim_img_dir)
-                sim_img = crop_img(sim_img, [896, 896], [-16, -16])
-
-                '''cv2.imshow("Real", real_img)
-                cv2.imshow("Sim", sim_img)
-                key = cv2.waitKey(10)
-                if key == 27:
-                    stop = True
-                    break'''
-
-                if img_file[1] == '_':
-                    cnt = int(img_file[0])
-                else:
-                    cnt = int(img_file[:2])
-
-                if (obj_name in test_list) or (cnt in test_cnt_list):
-                    cv2.imwrite(test_real_dir + '/' + obj_name + '_' + img_file, real_img)
-                    cv2.imwrite(test_sim_dir + '/' + obj_name + '_' + img_file, sim_img)
-                else:
-                    cv2.imwrite(train_real_dir + '/' + obj_name + '_' + img_file, real_img)
-                    cv2.imwrite(train_sim_dir + '/' + obj_name + '_' + img_file, sim_img)
-
-            print(obj_name)
-
-            if stop:
-                break
-
-    if init:
-        init_dir = "/home/won/Dropbox/marker_sim_real_images/raw/real/init/"
-
-        train_real_dir = "/home/won/Dropbox/marker_sim_real_images/dataset/train/real/"
-        train_sim_dir = "/home/won/Dropbox/marker_sim_real_images/dataset/train/sim/"
-        test_real_dir = "/home/won/Dropbox/marker_sim_real_images/dataset/test_v2/real/"
-        test_sim_dir = "/home/won/Dropbox/marker_sim_real_images/dataset/test_v2/sim/"
-
-        for obj_name in obj_list:
-            init = cv2.imread(init_dir + 'init_' + obj_name + '.jpg')
-            #real_img = undistort_img(init_real)
-            real_img = crop_img(init, [896, 896])
-            sim_img = np.ones((256, 256, 3), np.uint8) * 254
-
-            cv2.imwrite(test_real_dir + '/' + obj_name + '_init.jpg', real_img)
-            cv2.imwrite(test_sim_dir + '/' + obj_name + '_init.jpg', sim_img)
-            if obj_name not in test_list:
-                cv2.imwrite(train_real_dir + '/' + obj_name + '_init.jpg', real_img)
-                cv2.imwrite(train_sim_dir + '/' + obj_name + '_init.jpg', sim_img)
-
-    cv2.destroyAllWindows()
+    # move dz
+    if args.dz != 0:
