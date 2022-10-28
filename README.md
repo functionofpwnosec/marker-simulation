@@ -11,4 +11,4 @@ The `data/raw` folder contains the raw tactile and simulated depth images and th
 ## Evaluation
 We have evaluated the quality of 
 
-<img src = "doc/marker_dzdxy.png" width="40%"> <img src = "doc/marker_dzdxy.png" width="40%">
+<img src = "doc/image_result-1.png" width="500px"> <img src = "doc/marker_dzdxy.png" width="500px">
