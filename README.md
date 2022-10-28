@@ -10,3 +10,4 @@ The `data/raw` folder contains the raw tactile and simulated depth images and th
 
 ## Evaluation
 We have evaluated the quality of 
+![image_result](./doc/image_result.pdf)
