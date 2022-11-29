@@ -1,8 +1,10 @@
 import sys
 import os
 import argparse
+import math
+
+import cv2
 import numpy as np
-#import cv2
 import torch
 import mujoco_py as mjp
 
@@ -10,18 +12,18 @@ obj_list = ['circleshell', 'cone', 'cross', 'cubehole', 'cuboid', 'cylinder', 'd
             'pacman', 'S', 'sphere', 'squareshell', 'star', 'tetrahedron', 'torus']
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--obj', type=str, default='circleshell', choices=obj_list)
-parser.add_argument('--x', type=float, default=0.0)
-parser.add_argument('--y', type=float, default=0.0)
-parser.add_argument('--r', type=float, default=0.0)
-parser.add_argument('--dx', type=float, default=0.0)
-parser.add_argument('--dy', type=float, default=0.0)
-parser.add_argument('--dz', type=float, default=0.0)
-parser.add_argument('--visualize_sim', type=bool, default=False)
-
+parser.add_argument('--object', '-obj', type=str, default='circleshell', choices=obj_list)
+parser.add_argument('--x_init', '-x', type=float, default=0.0)
+parser.add_argument('--y_init', '-y', type=float, default=0.0)
+parser.add_argument('--r_init', '-r', type=float, default=0.0)
+parser.add_argument('--dx', '-dx', type=float, default=0.5)
+parser.add_argument('--dy', '-dy', type=float, default=0.1)
+parser.add_argument('--dz', '-dz', type=float, default=0.1)
+parser.add_argument('--visualize_sim', '-vis_sim', type=bool, default=False)
+parser.add_argument('--visualize_motion_vector', '-vis_vec', type=bool, default=False)
 args = parser.parse_args()
 
-def depth2img(depth):
+def depth2img(depth, sim):
     extent = sim.model.stat.extent
     znear = sim.model.vis.map.znear * extent
     zfar = sim.model.vis.map.zfar * extent
@@ -29,15 +31,33 @@ def depth2img(depth):
     depth = 2. * znear * zfar / (zfar + znear - depth * (zfar - znear))
 
     depth[depth > 0.035] = 0.035
-    depth[depth > 0.032] = 0.032
+    depth[depth < 0.032] = 0.032
     image = 255 * (depth - 0.032) / 0.003
 
     return image.astype(np.uint8)
 
 def get_depth_img(sim):
     _, depth_frame = sim.render(width=1640, height=1232, camera_name='tact_cam', depth=True)
+    depth_frame = cv2.flip(depth_frame, 0)
+    depth_img = depth2img(depth_frame, sim)
 
-    return depth2img(depth_frame)
+    return crop_resize_depth_img(depth_img)
+
+def crop_resize_depth_img(img):
+    offset = [-16, -16]
+    img_center = [img.shape[0]/2 + offset[0], img.shape[1]/2 + offset[1]]
+    dim = [896, 896]
+    cropped_img = img[int(img_center[0] - dim[0]/2):int(img_center[0] + dim[0]/2), int(img_center[1] - dim[1]/2):int(img_center[1] + dim[1]/2)]
+    resized_img = cv2.resize(cropped_img, (256, 256), interpolation=cv2.INTER_AREA)
+
+    return cv2.merge((resized_img, resized_img, resized_img))
+
+def add_to_sequence(img, seq):
+    return np.vstack((seq, img.reshape(1, 256, 256, 3)))
+
+def set_sensor_pos(pos, sim):
+    sim.data.qpos[:] = pos
+    sim.forward()
 
 
 if __name__ == '__main__':
@@ -53,15 +73,58 @@ if __name__ == '__main__':
     sim = mjp.MjSim(model)
     sim.forward()
 
-    obj_name = 'obj' + str(obj_list.index(args.obj))
+    obj_name = 'obj' + str(obj_list.index(args.object))
     obj_pos = sim.data.get_body_xpos(obj_name)
 
     # set to initial position
-    qpos = [obj_pos[0] + args.x, obj_pos[1] + args.y, 0, args.r * np.pi / 180]
-    sim.data.qpos[:] = qpos
-    sim.forward()
-
-    frame = get_depth_img(sim)
+    qpos_init = [obj_pos[0] + args.x_init * 0.001, obj_pos[1] + args.y_init * 0.001, 0., args.r_init * np.pi / 180]
+    set_sensor_pos(qpos_init, sim)
+    sim_depth = get_depth_img(sim)
+    depth_seq = sim_depth.reshape(1, 256, 256, 3)
 
     # move dz
-    if args.dz != 0:
+    qpos = qpos_init[:]
+    dz_cnt = math.ceil(args.dz / 0.1)
+    for i in range(dz_cnt):
+        if i < dz_cnt - 1:
+            qpos[2] += 0.0001
+        else:
+            qpos[2] += (args.dz - 0.1 * i) * 0.001
+
+        print(qpos[2])
+        set_sensor_pos(qpos, sim)
+        sim_depth = get_depth_img(sim)
+        depth_seq = add_to_sequence(sim_depth, depth_seq)
+
+        if args.visualize_sim:
+            rgb_view_sim = sim.render(width=1920, height=1080, camera_name='cam', depth=False)
+            bgr_view_sim = cv2.flip(cv2.cvtColor(rgb_view_sim, cv2.COLOR_RGB2BGR), 0)
+
+            cv2.imshow("sim", bgr_view_sim)
+            cv2.waitKey(0)
+
+    # move dx and/or dy
+    dxy = math.sqrt(args.dx ** 2 + args.dy ** 2)
+    dxy_step = [0.0001 * args.dx / dxy, 0.0001 * args.dy / dxy]
+    dxy_cnt = math.ceil(dxy / 0.1)
+    for i in range(dxy_cnt):
+        if i < dxy_cnt - 1:
+            qpos[0] += dxy_step[0]
+            qpos[1] += dxy_step[1]
+        else:
+            qpos[0] += 0.001 * args.dx - dxy_step[0] * i
+            qpos[1] += 0.001 * args.dy - dxy_step[1] * i
+
+        print(qpos)
+        set_sensor_pos(qpos, sim)
+        sim_depth = get_depth_img(sim)
+        depth_seq = add_to_sequence(sim_depth, depth_seq)
+
+        if args.visualize_sim:
+            rgb_view_sim = sim.render(width=1920, height=1080, camera_name='cam', depth=False)
+            bgr_view_sim = cv2.flip(cv2.cvtColor(rgb_view_sim, cv2.COLOR_RGB2BGR), 0)
+
+            cv2.imshow("sim", bgr_view_sim)
+            cv2.waitKey(0)
+
+    cv2.destroyAllWindows()

@@ -49,9 +49,11 @@
         <light pos="-0.6 0.6 3" />
         <light pos="-0.6 -0.6 3" />
 
-        <camera name="cam" pos="0 -0.26 0.95" quat="0.866025 0.5 0 0" />
+        <camera name="cam" pos="0.2 -0.4 1" quat="0.791240 0.554032 0.148453 0.212012" />
+        <!--<camera name="cam" pos="0.09 -0.045 0.815" quat="0.707107 0.707107 0 0" />-->
 
         <body name="tact_sensor" pos="0 0 0.845" quat="0 1 0 0">
+        <!--<body name="tact_sensor" pos="0.0908 0.03 0.8442" quat="0 1 0 0">-->
             <geom type="mesh" quat="0.707107 0.707107 0 0" rgba="1 1 1 1" mesh="tact_sensor_case" />
             <camera name="tact_cam" fovy="34.87" pos="0 0 0" quat="0 1 0 0" /> <!--fovy="37"--> <!--fovy="46.73" pos="0 0 0.006"-->
             <joint name="tact_x" type="slide" axis="1 0 0" limited="true" range="-0.6 0.6" />
