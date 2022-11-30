@@ -14,7 +14,18 @@ We use the MuJoCo simulator and require users to have it installed for using thi
 Information on the installation of MuJoCo can be found [here](https://github.com/deepmind/mujoco).
 
 ## Usage
+You can choose to make contact with one of the 16 objects (listed below) using the `--object` (`-obj`) argument.
 
+*'circleshell', 'cone', 'cross', 'cubehole', 'cuboid', 'cylinder', 'doubleslope', 'hemisphere', 'line', 'pacman', 'S', 'sphere', 'squareshell', 'star', 'tetrahedron', 'torus'*
+
+You can set the initial pose of the sensor with respect to the center of the target object with `--x_init`, `--y_init`, `--r_init` (`-x`, `-y`, `-r`) arguments.
+The units of `-x`, `-y` are millimeter and the unit of `-r` is degree.  
+
+You can control the amount of normal deformation with `--dz`, (`-dz`), and lateral deformations with `--dx`, `--dy` (`-dx`, `-dy`) arguments.
+The units of `-dx`, `-dy`, and `-dz` are millimeter.
+Note that we have limited the range of the deformations to [0, 1.5] for `-dz`, and [-1, 1] for `-dx`, `-dy`.
+
+Run `python main.py -obj circleshell -dx 0.2 -dy 0.3 -dz 0.7` to visualize the generated tactile image.
 
 ## Custom Models, Dataset, and Training
 
