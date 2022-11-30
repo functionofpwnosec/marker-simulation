@@ -2,7 +2,7 @@
 We present a generative adversarial network(GAN)-based method for generating realistic marker-embedded tactile images in Gelsight-like vision-based tactile sensors.
 The trained generator in the GAN translates simulated depth image sequences to RGB marker-embedded tactile images.
 
-For more information, please check the paper.
+For more information, please check the [paper]().
 
 ## Prerequisites
 The project has been tested on Ubuntu 16.04 & 18.04 with Python 3.7.
@@ -15,9 +15,9 @@ Information on the installation of MuJoCo can be found [here](https://github.com
 
 ## Usage
 You can choose to make contact with one of the 16 objects (listed below) using the `--object` (`-obj`) argument.
-
-*'circleshell', 'cone', 'cross', 'cubehole', 'cuboid', 'cylinder', 'doubleslope', 'hemisphere', 'line', 'pacman', 'S', 'sphere', 'squareshell', 'star', 'tetrahedron', 'torus'*
-
+```
+'circleshell', 'cone', 'cross', 'cubehole', 'cuboid', 'cylinder', 'doubleslope', 'hemisphere', 'line', 'pacman', 'S', 'sphere', 'squareshell', 'star', 'tetrahedron', 'torus'
+```
 You can set the initial pose of the sensor with respect to the center of the target object with `--x_init`, `--y_init`, `--r_init` (`-x`, `-y`, `-r`) arguments.
 The units of `-x`, `-y` are millimeter and the unit of `-r` is degree.  
 
