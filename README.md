@@ -27,7 +27,10 @@ Note that we have limited the range of the deformations to [0, 1.5] for `-dz`, a
 
 Run `python main.py -obj circleshell -dx 0.2 -dy 0.3 -dz 0.7` to visualize the generated tactile image.
 
-## Custom Models, Dataset, and Training
+## Examples
+<img src="doc/fig1.png" height="400px"> <img src="doc/image_result.png" height="400px">
+
+## Custom Model and Training
 
 
 ## Citation
