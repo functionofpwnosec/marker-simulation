@@ -6,6 +6,8 @@ The project has been tested on Ubuntu 16.04 & 18.04 with Python 3.7.
 
 To install the dependencies: `pip install -r requirements.txt`
 
+Our project uses a physics simulator to obtain simulated depth images from. We use the MuJoCo simulator and require users to have it installed for using this project. Information on the installation of MuJoCo can be found [here](https://github.com/deepmind/mujoco).
+
 ## Data
 We have uploaded a 
 All images collected in our work can be found under `data` folder.
