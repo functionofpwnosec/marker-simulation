@@ -17,13 +17,13 @@ obj_list = ['circleshell', 'cone', 'cross', 'cubehole', 'cuboid', 'cylinder', 'd
             'pacman', 'S', 'sphere', 'squareshell', 'star', 'tetrahedron', 'torus']
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--object', '-obj', type=str, default='circleshell', choices=obj_list)
+parser.add_argument('--object', '-obj', type=str, default='S', choices=obj_list)
 parser.add_argument('--x_init', '-x', type=float, default=0.0)
 parser.add_argument('--y_init', '-y', type=float, default=0.0)
 parser.add_argument('--r_init', '-r', type=float, default=0.0)
-parser.add_argument('--dx', '-dx', type=float, default=0.652)
-parser.add_argument('--dy', '-dy', type=float, default=-0.3)
-parser.add_argument('--dz', '-dz', type=float, default=1.5)
+parser.add_argument('--dx', '-dx', type=float, default=-0.252)
+parser.add_argument('--dy', '-dy', type=float, default=-0.31)
+parser.add_argument('--dz', '-dz', type=float, default=0.8)
 parser.add_argument('--visualize_motion_vector', '-vis_vec', type=bool, default=False)
 args = parser.parse_args()
 
