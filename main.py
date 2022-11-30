@@ -17,14 +17,15 @@ obj_list = ['circleshell', 'cone', 'cross', 'cubehole', 'cuboid', 'cylinder', 'd
             'pacman', 'S', 'sphere', 'squareshell', 'star', 'tetrahedron', 'torus']
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--object', '-obj', type=str, default='S', choices=obj_list)
-parser.add_argument('--x_init', '-x', type=float, default=0.0)
-parser.add_argument('--y_init', '-y', type=float, default=0.0)
-parser.add_argument('--r_init', '-r', type=float, default=0.0)
-parser.add_argument('--dx', '-dx', type=float, default=-0.252)
-parser.add_argument('--dy', '-dy', type=float, default=-0.31)
-parser.add_argument('--dz', '-dz', type=float, default=0.8)
+parser.add_argument('--object', '-obj', type=str, default='circleshell', choices=obj_list)
+parser.add_argument('--x_init', '-x', type=float, default=0.)
+parser.add_argument('--y_init', '-y', type=float, default=0.)
+parser.add_argument('--r_init', '-r', type=float, default=0.)
+parser.add_argument('--dx', '-dx', type=float, default=0.)
+parser.add_argument('--dy', '-dy', type=float, default=0.)
+parser.add_argument('--dz', '-dz', type=float, default=0.)
 parser.add_argument('--visualize_motion_vector', '-vis_vec', type=bool, default=False)
+parser.add_argument('--vector_magnification', '-mag', type=float, default=5.0)
 args = parser.parse_args()
 
 
@@ -58,7 +59,7 @@ if __name__ == '__main__':
         else:
             qpos[2] += (args.dz - 0.1 * i) * 0.001
 
-        print(qpos[2])
+        #print(qpos[2])
         utils.set_sensor_pos(qpos, sim)
         sim_depth = utils.get_depth_img(sim)
         depth_seq = utils.add_to_sequence(sim_depth, depth_seq)
@@ -76,12 +77,12 @@ if __name__ == '__main__':
             qpos[0] += 0.001 * args.dx - dxy_step[0] * i
             qpos[1] += 0.001 * args.dy - dxy_step[1] * i
 
-        print(qpos)
+        #print(qpos)
         utils.set_sensor_pos(qpos, sim)
         sim_depth = utils.get_depth_img(sim)
         depth_seq = utils.add_to_sequence(sim_depth, depth_seq)
 
-    # generate tactile image
+    # generate tactile images
     G = LSTMUnet3dGenerator().to(device)
     G.load_state_dict(torch.load(os.path.join('model', 'lstm_3d_unet.pt')))
     G.eval()
@@ -90,6 +91,12 @@ if __name__ == '__main__':
     G_output = G(G_input)
     gen_img = utils.output_to_img(G_output)
 
+    if args.visualize_motion_vector and args.dz != 0.:
+        init_gen_img = utils.output_to_img(G_output, n=1)
+        gen_img = utils.output_to_img(G_output)
+        utils.draw_motion_vectors(init_gen_img, gen_img, mag=args.vector_magnification)
+
+    print('Press any key to terminate...')
     cv2.imshow('generated image', gen_img)
     cv2.waitKey(0)
 
