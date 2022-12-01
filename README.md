@@ -29,9 +29,9 @@ Run `python main.py -obj circleshell -dx 0.2 -dy 0.3 -dz 0.7` to visualize the g
 
 ## Examples
 <p float="left">
-  <img src="doc/sim_0.png" width="32%" />
-  <img src="doc/dz_only_0.png" width="32%" /> 
-  <img src="doc/dz_dx_0.png" width="32%" />
+  <img src="doc/sim_0.png" width="256px" />
+  <img src="doc/dz_only_0.png" width="256px" /> 
+  <img src="doc/dz_dx_0.png" width="256px" />
 </p>
 
 The left image corresponds to depth image available from both `-obj circleshell -dz 0.5` and `-obj circleshell -x -1. -dx 1. -dz 0.5`.
