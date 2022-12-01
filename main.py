@@ -24,7 +24,7 @@ parser.add_argument('--r_init', '-r', type=float, default=0.)
 parser.add_argument('--dx', '-dx', type=float, default=0.)
 parser.add_argument('--dy', '-dy', type=float, default=0.)
 parser.add_argument('--dz', '-dz', type=float, default=0.)
-parser.add_argument('--visualize_motion_vector', '-vis_vec', type=bool, default=False)
+parser.add_argument('--visualize_motion_vector', '-vis_vec', type=bool, default=True)
 parser.add_argument('--vector_magnification', '-mag', type=float, default=5.0)
 args = parser.parse_args()
 

@@ -15,9 +15,9 @@ Information on the installation of MuJoCo can be found [here](https://github.com
 
 ## Usage
 You can choose to make contact with one of the 16 objects (listed below) using the `--object` (`-obj`) argument.
-```
-'circleshell', 'cone', 'cross', 'cubehole', 'cuboid', 'cylinder', 'doubleslope', 'hemisphere', 'line', 'pacman', 'S', 'sphere', 'squareshell', 'star', 'tetrahedron', 'torus'
-```
+
+>'circleshell', 'cone', 'cross', 'cubehole', 'cuboid', 'cylinder', 'doubleslope', 'hemisphere', 'line', 'pacman', 'S', 'sphere', 'squareshell', 'star', 'tetrahedron', 'torus'
+
 You can set the initial pose of the sensor with respect to the center of the target object with `--x_init`, `--y_init`, `--r_init` (`-x`, `-y`, `-r`) arguments.
 The units of `-x`, `-y` are millimeter and the unit of `-r` is degree.  
 
@@ -28,7 +28,20 @@ Note that we have limited the range of the deformations to [0, 1.5] for `-dz`, a
 Run `python main.py -obj circleshell -dx 0.2 -dy 0.3 -dz 0.7` to visualize the generated tactile image.
 
 ## Examples
-<img src="doc/fig1.png" height="400px"> <img src="doc/image_result.png" height="400px">
+<p float="left">
+  <img src="doc/sim_0.png" width="32%" />
+  <img src="doc/dz_only_0.png" width="32%" /> 
+  <img src="doc/dz_dx_0.png" width="32%" />
+</p>
+
+The left image corresponds to depth image available from both `-obj circleshell -dz 0.5` and `-obj circleshell -x -1. -dx 1. -dz 0.5`.
+
+The middle image is generated from `-obj circleshell -dz 0.5`.
+The right image is generated from `-obj circleshell -x -1. -dx 1. -dz 0.5`.
+
+<img src="doc/image_result.png" width="66%">
+
+These are examples of generated images using different models.
 
 ## Dataset
 For access to the aligned real and simulated image dataset we used for training the GAN, contact us via e-mail (you can find the address in the paper).
