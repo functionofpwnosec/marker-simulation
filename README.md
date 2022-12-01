@@ -41,7 +41,8 @@ The right image is generated from `-obj circleshell -x -1. -dx 1. -dz 0.5`.
 
 <img src="doc/image_result.png" width="66%">
 
-These are examples of generated images using different models.
+These are examples of generated images using different methods.
+Details on the performance of the methods are available in the paper. 
 
 ## Dataset
 For access to the aligned real and simulated image dataset we used for training the GAN, contact us via e-mail (you can find the address in the paper).
