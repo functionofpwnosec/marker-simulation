@@ -7,11 +7,8 @@ For more information, please check the [paper]().
 ## Prerequisites
 The project has been tested on Ubuntu 16.04 & 18.04 with Python 3.7.
 
-To install the dependencies: `pip install -r requirements.txt`
-
 Our project uses a physics simulator to obtain simulated depth images.
-We use the MuJoCo simulator (version 2.1) and require users to have it installed for using this project.
-Information on the installation of MuJoCo can be found [here](https://github.com/deepmind/mujoco).
+We use the MuJoCo simulator (version 2.1) with [mujoco-py](https://github.com/openai/mujoco-py) and require users to have it installed for using this project.
 
 ## Usage
 You can choose to make contact with one of the 16 objects (listed below) using the `--object` (`-obj`) argument.
