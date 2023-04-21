@@ -34,6 +34,8 @@ def get_depth_img(sim):
     depth_img = depth2img(depth_frame, sim)
     crop_resized_depth_img = crop_resize_depth_img(depth_img)
 
+    cv2.namedWindow('simulated depth')
+    cv2.moveWindow('simulated depth', 1600, 100)
     cv2.imshow('simulated depth', crop_resized_depth_img)
     cv2.waitKey(1)
 
@@ -50,7 +52,6 @@ def add_to_sequence(img, seq):
 def set_sensor_pos(pos, sim):
     sim.data.qpos[:] = pos
     sim.forward()
-
 
 def seq_to_input(seq):
     seq = torch.permute(seq, (1, 0, 2, 3))

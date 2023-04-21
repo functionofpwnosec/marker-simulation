@@ -17,14 +17,14 @@ obj_list = ['circleshell', 'cone', 'cross', 'cubehole', 'cuboid', 'cylinder', 'd
             'pacman', 'S', 'sphere', 'squareshell', 'star', 'tetrahedron', 'torus']
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--object', '-obj', type=str, default='circleshell', choices=obj_list)
+parser.add_argument('--object', '-obj', type=str, default='cylinder', choices=obj_list)
 parser.add_argument('--x_init', '-x', type=float, default=0.)
 parser.add_argument('--y_init', '-y', type=float, default=0.)
 parser.add_argument('--r_init', '-r', type=float, default=0.)
 parser.add_argument('--dx', '-dx', type=float, default=0.)
 parser.add_argument('--dy', '-dy', type=float, default=0.)
 parser.add_argument('--dz', '-dz', type=float, default=0.)
-parser.add_argument('--visualize_motion_vector', '-vis_vec', type=bool, default=True)
+parser.add_argument('--visualize_motion_vector', '-vis_vec', type=bool, default=False)
 parser.add_argument('--vector_magnification', '-mag', type=float, default=5.0)
 args = parser.parse_args()
 
@@ -47,6 +47,7 @@ if __name__ == '__main__':
 
     # set to initial position
     qpos_init = [obj_pos[0] + args.x_init * 0.001, obj_pos[1] + args.y_init * 0.001, 0., args.r_init * np.pi / 180]
+
     utils.set_sensor_pos(qpos_init, sim)
     depth_seq = utils.get_depth_img(sim)
 
@@ -57,7 +58,14 @@ if __name__ == '__main__':
         if i < dz_cnt - 1:
             qpos[2] += 0.0001
         else:
-            qpos[2] += (args.dz - 0.1 * i) * 0.001
+            qpos[2] += (args.dz - 0.1 * i) * 0.0001
+
+        scene_frame = sim.render(width=1280, height=720, camera_name='cam', depth=False)
+        scene_frame = cv2.flip(scene_frame, 0)
+        cv2.namedWindow('simulator')
+        cv2.moveWindow('simulator', 200, 100)
+        cv2.imshow('simulator', scene_frame)
+        cv2.waitKey(100)
 
         #print(qpos[2])
         utils.set_sensor_pos(qpos, sim)
@@ -78,13 +86,20 @@ if __name__ == '__main__':
             qpos[1] += 0.001 * args.dy - dxy_step[1] * i
 
         #print(qpos)
+        scene_frame = sim.render(width=1280, height=720, camera_name='cam', depth=False)
+        scene_frame = cv2.flip(scene_frame, 0)
+        cv2.namedWindow('simulator')
+        cv2.moveWindow('simulator', 200, 100)
+        cv2.imshow('simulator', scene_frame)
+        cv2.waitKey(100)
+
         utils.set_sensor_pos(qpos, sim)
         sim_depth = utils.get_depth_img(sim)
         depth_seq = utils.add_to_sequence(sim_depth, depth_seq)
 
     # generate tactile images
     G = LSTMUnet3dGenerator().to(device)
-    G.load_state_dict(torch.load(os.path.join('model', 'lstm_3d_unet.pt')))
+    G.load_state_dict(torch.load(os.path.join('model', 'final.pt')))
     G.eval()
 
     G_input = utils.seq_to_input(depth_seq).to(device)
@@ -97,6 +112,8 @@ if __name__ == '__main__':
         utils.draw_motion_vectors(init_gen_img, gen_img, mag=args.vector_magnification)
 
     print('Press any key to terminate...')
+    cv2.namedWindow('generated image')
+    cv2.moveWindow('generated image', 1600, 450)
     cv2.imshow('generated image', gen_img)
     cv2.waitKey(0)
 
