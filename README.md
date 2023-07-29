@@ -2,7 +2,7 @@
 We present a generative adversarial network(GAN)-based method for generating realistic marker-embedded tactile images in Gelsight-like vision-based tactile sensors.
 The trained generator translates simulated depth image sequences to RGB marker-embedded tactile images.
 
-For more information, please check the [paper]().
+For more information, please check the [paper](https://ieeexplore.ieee.org/document/10146407).
 
 ## Prerequisites
 The project has been tested on Ubuntu 16.04 & 18.04 with Python 3.7.
@@ -45,4 +45,14 @@ Details on the performance of the methods are available in the paper.
 For access to the aligned real and simulated image dataset we used for training the GAN, contact us via e-mail (you can find the address in the paper).
 
 ## Citation
-TBA
+```
+@ARTICLE{kim2023marker,
+  author={Kim, Won Dong and Yang, Sanghoon and Kim, Woojong and Kim, Jeong-Jung and Kim, Chang-Hyun and Kim, Jung},
+  journal={IEEE Robotics and Automation Letters}, 
+  title={Marker-Embedded Tactile Image Generation via Generative Adversarial Networks}, 
+  year={2023},
+  volume={8},
+  number={8},
+  pages={4481-4488},
+  doi={10.1109/LRA.2023.3284370}}
+```
